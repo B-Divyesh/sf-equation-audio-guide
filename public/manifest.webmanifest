@@ -1,0 +1,10 @@
+{
+  "name": "Equation Audio Guide",
+  "short_name": "Audio Guide",
+  "description": "Create an editable, author-reviewed spoken route through technical articles.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3ebd8",
+  "theme_color": "#f3ebd8",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
