@@ -1,0 +1,12 @@
+{
+  "slug": "equation-audio-guide",
+  "title": "Equation Audio Guide",
+  "territory": "utilities",
+  "user": "A learner or teacher publishing technical articles with equations and code who needs a correct, reviewable spoken route through the material.",
+  "smallest_useful_product": "Static web editor that accepts Markdown/LaTex, proposes deterministic spoken-math phrases and code-reading chunks, flags ambiguity, and exports an audio-script checklist.",
+  "success_measure": "For ten representative equations, a teacher can approve or correct a narrated script in under 15 minutes and listeners answer 80% of accompanying comprehension checks.",
+  "artifact_class": "static-web",
+  "monetization": "free",
+  "constraints": "Do not claim universal screen-reader equivalence; support MathML/LaTex safely with no arbitrary HTML execution; output must remain editable by a human.",
+  "why_distinct": "It produces an author-reviewed explanation of notation, rather than wrapping generic TTS around a web page."
+}
