@@ -57,8 +57,7 @@ app.innerHTML = `
       <figure class="hero-art">
         <div class="tape tape-top" aria-hidden="true"></div>
         <picture>
-          <source media="(max-width: 720px)" srcset="/assets/audio-margin-hero-720.webp">
-          <img src="/assets/audio-margin-hero-1120.webp" width="1120" height="747" fetchpriority="high" decoding="async" alt="Risograph collage of a notation sheet passing through a folded paper horn and emerging as three checked narration strips.">
+          <img src="/assets/audio-margin-hero-1120.webp" srcset="/assets/audio-margin-hero-720.webp 720w, /assets/audio-margin-hero-1120.webp 1120w" sizes="(max-width: 960px) calc(100vw - 40px), 48vw" width="1536" height="1024" fetchpriority="high" decoding="async" alt="Risograph collage of a notation sheet passing through a folded paper horn and emerging as three checked narration strips.">
         </picture>
         <figcaption><span>Notation in</span><span>Narration out</span></figcaption>
       </figure>
@@ -101,7 +100,7 @@ app.innerHTML = `
           <div class="pane-heading review-heading">
             <div>
               <span class="step-number step-number-red">2</span>
-              <div><p class="kicker">Audio margin</p><h3 id="review-title">Review the route</h3></div>
+              <div><p class="kicker">Audio margin</p><h3 id="review-title" tabindex="-1">Review the route</h3></div>
             </div>
             <div class="progress-stamp" id="progress-stamp" aria-live="polite"><strong>0/0</strong><span>approved</span></div>
           </div>
@@ -323,16 +322,20 @@ function renderCard(segment: GuideSegment, index: number): HTMLLIElement {
   return item;
 }
 
-function renderSegments(): void {
-  reviewEmpty.hidden = segments.length > 0;
-  reviewContent.hidden = segments.length === 0;
-  segmentList.replaceChildren(...segments.map(renderCard));
+function updateSummary(): void {
   const approved = segments.filter((segment) => segment.status === 'approved').length;
   const openIssues = segments.reduce((total, segment) => total + segment.issues.filter((issue) => !issue.checked).length, 0);
   progressStamp.innerHTML = `<strong>${approved}/${segments.length}</strong><span>approved</span>`;
   document.querySelector('#count-all')!.textContent = String(segments.length);
   document.querySelector('#count-issues')!.textContent = String(openIssues);
   document.querySelector('#count-approved')!.textContent = String(approved);
+}
+
+function renderSegments(): void {
+  reviewEmpty.hidden = segments.length > 0;
+  reviewContent.hidden = segments.length === 0;
+  segmentList.replaceChildren(...segments.map(renderCard));
+  updateSummary();
   saveGuide();
 }
 
@@ -353,7 +356,6 @@ function buildGuide(): void {
     renderSegments();
     showToast(`Built ${segments.length} route ${segments.length === 1 ? 'segment' : 'segments'}.`);
     document.querySelector<HTMLElement>('#review-title')?.focus({ preventScroll: true });
-    document.querySelector('#review-pane');
     reviewContent.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   } catch {
     sourceError.hidden = false;
@@ -449,6 +451,7 @@ segmentList.addEventListener('input', (event) => {
   if (stamp) stamp.textContent = statusLabel(segment.status);
   card?.classList.remove('status-approved');
   card?.classList.add(`status-${segment.status}`);
+  updateSummary();
 });
 
 segmentList.addEventListener('change', (event) => {
@@ -494,6 +497,11 @@ document.querySelector('#next-issue')!.addEventListener('click', () => {
   if (!open) { showToast('No open proofing notes.'); return; }
   if (currentFilter === 'approved') {
     currentFilter = 'all';
+    document.querySelectorAll<HTMLButtonElement>('.filter-button').forEach((button) => {
+      const active = button.dataset.filter === 'all';
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
     renderSegments();
   }
   const checkbox = document.querySelector<HTMLInputElement>(`#${open.id} input:not(:checked)`);

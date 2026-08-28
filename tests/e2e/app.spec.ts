@@ -81,3 +81,18 @@ test('loads without console errors', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   expect(errors).toEqual([]);
 });
+
+test('serves the cached shell offline and shows its status', async ({ page, context }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile', 'Offline behavior is browser-level and covered in Chromium.');
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+  await context.setOffline(true);
+  const cachedHome = await page.evaluate(async () => {
+    const response = await fetch('/');
+    return { ok: response.ok, includesTitle: (await response.text()).includes('Equation Audio Guide') };
+  });
+  expect(cachedHome).toEqual({ ok: true, includesTitle: true });
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await expect(page.getByRole('status').filter({ hasText: 'offline' })).toBeVisible();
+  await context.setOffline(false);
+});

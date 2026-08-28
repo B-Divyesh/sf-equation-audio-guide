@@ -55,7 +55,7 @@ export function speakLatex(raw: string): string {
     .replace(/^\s*(\$\$?|\\\[|\\\()|((\$\$?|\\\]|\\\))\s*$)/g, '')
     .replace(/\\begin\{(?:b?matrix|pmatrix|vmatrix)\}([\s\S]*?)\\end\{(?:b?matrix|pmatrix|vmatrix)\}/g, (_match, body: string) => {
       const rows = body.split(/\\\\/).map((row) => row.split('&').map((cell) => speakLatex(cell)));
-      return ` matrix with ${rows.length} rows: ${rows.map((row, index) => `row ${index + 1}, ${row.join(', ')}`).join('; ')}; end matrix `;
+      return ` \\text{matrix with ${rows.length} rows: ${rows.map((row, index) => `row ${index + 1}, ${row.join(', ')}`).join('; ')}; end matrix} `;
     });
   const words: string[] = [];
   let index = 0;
@@ -91,7 +91,7 @@ export function speakLatex(raw: string): string {
           continue;
         }
       }
-      if (['text', 'mathrm', 'operatorname'].includes(name)) {
+      if (['text', 'mathrm', 'mathbf', 'mathit', 'mathbb', 'operatorname'].includes(name)) {
         const text = readGroup(input, index);
         if (text) { words.push(text.value); index = text.end; continue; }
       }
@@ -164,7 +164,7 @@ export function mathIssues(source: string): string[] {
   if (/\\(?:pm|mp)\b/.test(source)) issues.push('Choose whether the paired signs should be explained together.');
   if (/\\begin\{(?:b?matrix|pmatrix|vmatrix)\}/.test(source)) issues.push('Confirm the row-by-row matrix reading order.');
   if (/[^\\]\//.test(source)) issues.push('Confirm the intended grouping around the slash.');
-  const supported = new Set([...Object.keys(greek), ...Object.keys(commands), 'frac', 'sqrt', 'text', 'mathrm', 'operatorname', 'sum', 'prod', 'int', 'lim', 'left', 'right', 'begin', 'end']);
+  const supported = new Set([...Object.keys(greek), ...Object.keys(commands), 'frac', 'sqrt', 'text', 'mathrm', 'mathbf', 'mathit', 'mathbb', 'operatorname', 'sum', 'prod', 'int', 'lim', 'left', 'right', 'begin', 'end']);
   const unknown = Array.from(source.matchAll(/\\([A-Za-z]+)/g), (match) => match[1]).filter((name) => !supported.has(name));
   if (unknown.length) issues.push(`Check the reading of unsupported command${unknown.length > 1 ? 's' : ''}: ${Array.from(new Set(unknown)).join(', ')}.`);
   return issues;

@@ -1,8 +1,16 @@
-const CACHE = 'equation-audio-guide-v1';
+const CACHE = 'equation-audio-guide-v2';
 const SHELL = ['/', '/privacy/', '/terms/', '/favicon.svg', '/manifest.webmanifest', '/assets/audio-margin-hero-720.webp', '/assets/audio-margin-hero-1120.webp'];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    await cache.addAll(SHELL);
+    const home = await fetch('/');
+    const markup = await home.clone().text();
+    const buildAssets = Array.from(markup.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g), (match) => match[1]);
+    await cache.addAll(buildAssets);
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {

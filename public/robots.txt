@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://equation-audio-guide.sociobot.in/sitemap.xml
