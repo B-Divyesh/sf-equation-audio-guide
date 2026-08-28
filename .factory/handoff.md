@@ -1,5 +1,11 @@
 # Equation Audio Guide — build handoff
 
+## Independent verification addendum — PASS
+
+Verified on 2026-08-28 against candidate `d74e66aef8a5ff172d4aa5daddb24b158dcc7855` and <https://equation-audio-guide.sociobot.in/>. **PASS**: clean locked install, all 19 unit and 13 browser tests, exact production build, independent full workflow/recovery tests, desktop and 390px checks, keyboard/focus/reduced-motion, axe serious/critical scans, live headers/cache/privacy/network checks, bundle budgets, and live PWA offline reload/service-worker update all passed. The live CSS, JS, and service worker match `dist/` (including byte-identical `sw.js`).
+
+Detailed evidence, commands, metrics, and the one non-release Vite-preview caveat are in [`.factory/verification.md`](verification.md). No product code was changed by verification.
+
 Work order: `equation-audio-guide-build-1`
 
 Completed: 2026-08-28
