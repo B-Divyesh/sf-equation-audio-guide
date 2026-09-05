@@ -1,4 +1,26 @@
-# Equation Audio Guide — repair handoff
+# Equation Audio Guide — handoff
+
+## Verification 2 result — FAIL
+
+Independent verification on 2026-09-05 reviewed implementation
+`e7eb86259828bb7575e83a7dd3989270c6fa6908` at documentation head
+`571322da7251bf1cd2c5ddfd5172ed06fdcfc71b`.
+
+The main product flow, live demo, deployment identity, all 12 declared claim
+commands, `npm test`, and `npm run build` pass. Acceptance still fails with two
+findings and five untested public claims:
+
+- five public behaviors are absent from or incompletely proved by the claim
+  manifest: clipboard copy, every unchecked note in exports, confirmed Clear,
+  the keyboard build shortcut, and closing proofing notes;
+- several phone links have clickable boxes smaller than the required 44×44 CSS
+  pixels, including footer Demo/Terms links and the Terms repository link.
+
+Full evidence and repair guidance are in
+[`.factory/verification-2.md`](verification-2.md). No product code was changed
+by verification 2.
+
+## Repair 1 record
 
 Completed: 2026-09-05  
 Work order: `equation-audio-guide-repair-1`  
