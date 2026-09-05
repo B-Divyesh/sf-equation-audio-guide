@@ -1,5 +1,11 @@
 # Equation Audio Guide — build handoff
 
+## Review 1 addendum — FAIL (2026-09-05)
+
+Independent review against live <https://equation-audio-guide.sociobot.in/> **FAILED** with **7 findings** and **11 untested public claims**. The live JS, CSS, and service worker match implementation candidate `d74e66aef8a5ff172d4aa5daddb24b158dcc7855`; documentation HEAD is `6852b6584a64dbdb58f79906ca425a9cb8b695ba`.
+
+The core live editor, populated example route, invalid/recovery/boundary paths, keyboard focus, reduced motion, same-origin request smoke check, and live offline reload work. Release acceptance remains blocked by: no isolated one-click demo; no claims manifest or claim-tagged proof; a failing clean `npm test` (mobile serious contrast failures and local service-worker-controller timeout); no designed 404; incomplete metadata/demo sitemap/title; and missing plain-words copy audit. See [`.factory/review-1.md`](review-1.md) for exact evidence and repairs.
+
 ## Independent verification addendum — PASS
 
 Verified on 2026-08-28 against candidate `d74e66aef8a5ff172d4aa5daddb24b158dcc7855` and <https://equation-audio-guide.sociobot.in/>. **PASS**: clean locked install, all 19 unit and 13 browser tests, exact production build, independent full workflow/recovery tests, desktop and 390px checks, keyboard/focus/reduced-motion, axe serious/critical scans, live headers/cache/privacy/network checks, bundle budgets, and live PWA offline reload/service-worker update all passed. The live CSS, JS, and service worker match `dist/` (including byte-identical `sw.js`).
