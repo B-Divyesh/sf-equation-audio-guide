@@ -9,7 +9,9 @@ Live: <https://equation-audio-guide.sociobot.in>
 **PASS.** The release blockers from review 1 are repaired. The deployed
 implementation is `e7eb86259828bb7575e83a7dd3989270c6fa6908`; its main product
 and test change is `71043743e33d4b4882080a9999cbf6998db6c4c5`, followed by the
-deployed 404-routing correction in `e7eb862`.
+deployed 404-routing correction in `e7eb862`. The initial documentation record
+is `fe3a0a21c8119c345e114ac6e793e510cbcaa1e7` and does not change deployed
+product files.
 
 ## What changed
 
