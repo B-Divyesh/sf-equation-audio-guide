@@ -1,71 +1,104 @@
-# Equation Audio Guide — build handoff
+# Equation Audio Guide — repair handoff
 
-## Review 1 addendum — FAIL (2026-09-05)
+Completed: 2026-09-05  
+Work order: `equation-audio-guide-repair-1`  
+Live: <https://equation-audio-guide.sociobot.in>
 
-Independent review against live <https://equation-audio-guide.sociobot.in/> **FAILED** with **7 findings** and **11 untested public claims**. The live JS, CSS, and service worker match implementation candidate `d74e66aef8a5ff172d4aa5daddb24b158dcc7855`; documentation HEAD is `6852b6584a64dbdb58f79906ca425a9cb8b695ba`.
+## Result
 
-The core live editor, populated example route, invalid/recovery/boundary paths, keyboard focus, reduced motion, same-origin request smoke check, and live offline reload work. Release acceptance remains blocked by: no isolated one-click demo; no claims manifest or claim-tagged proof; a failing clean `npm test` (mobile serious contrast failures and local service-worker-controller timeout); no designed 404; incomplete metadata/demo sitemap/title; and missing plain-words copy audit. See [`.factory/review-1.md`](review-1.md) for exact evidence and repairs.
+**PASS.** The release blockers from review 1 are repaired. The deployed
+implementation is `e7eb86259828bb7575e83a7dd3989270c6fa6908`; its main product
+and test change is `71043743e33d4b4882080a9999cbf6998db6c4c5`, followed by the
+deployed 404-routing correction in `e7eb862`.
 
-## Independent verification addendum — PASS
+## What changed
 
-Verified on 2026-08-28 against candidate `d74e66aef8a5ff172d4aa5daddb24b158dcc7855` and <https://equation-audio-guide.sociobot.in/>. **PASS**: clean locked install, all 19 unit and 13 browser tests, exact production build, independent full workflow/recovery tests, desktop and 390px checks, keyboard/focus/reduced-motion, axe serious/critical scans, live headers/cache/privacy/network checks, bundle budgets, and live PWA offline reload/service-worker update all passed. The live CSS, JS, and service worker match `dist/` (including byte-identical `sw.js`).
+- Added a real `/demo/` entry point and one-click landing action. The demo loads
+  a gradient-descent article into nine populated review cards.
+- Isolated demo state in `demo:equation-audio-guide:v1` local-storage keys.
+  The persistent banner has **Reset demo** and **Start for real**. Demo tests
+  seed real storage and prove it remains unchanged.
+- Added `.factory/claims.json` with twelve visitor claims. Each has exactly one
+  outcome-based `@claim:` Playwright test that begins with the shipped demo.
+- Replaced the flaky Vite-preview service-worker host with
+  `tests/static-server.mjs`, a production-style server for the emitted `dist/`
+  tree. The fresh-context offline test now reloads the cached demo reliably.
+- Removed opacity from generated-card motion so readable controls retain full
+  contrast throughout entrance motion. Desktop and mobile axe scans now have no
+  serious or critical violations.
+- Added a static demo page, a designed `404.html`, route-specific titles,
+  canonical URLs, Open Graph and Twitter metadata, a 1200×630 social image,
+  and a 180px touch icon. Unknown live paths now return the designed page with
+  HTTP 404.
+- Rewrote landing and legal copy in plain words, named the audience and first
+  action, and added the copy audit, demo documentation, catalog description,
+  and updated README.
 
-Detailed evidence, commands, metrics, and the one non-release Vite-preview caveat are in [`.factory/verification.md`](verification.md). No product code was changed by verification.
+## Review 1 disposition
 
-Work order: `equation-audio-guide-build-1`
+| Finding | Disposition |
+| --- | --- |
+| F1 demo sandbox | Fixed: direct demo, sample label, reset/start-real controls, isolated `demo:` keys, and `.factory/demo.md`. |
+| F2 claims | Fixed: twelve manifest entries and exact tagged clean-demo tests. |
+| F3 mobile contrast | Fixed: no opacity compositing during card entry; mobile axe passes. |
+| F4 offline test | Fixed: emitted-site static test server and separate fresh browser context. |
+| F5 404 | Fixed: designed page, SWA response override, and live unknown path returns HTTP 404. |
+| F6 metadata and sitemap | Fixed: demo metadata/title, canonical, OG/Twitter, touch icon, social image, and sitemap route. |
+| F7 plain words | Fixed: audience and sample action are on the first screen; audit is in `.factory/copy-audit.md`. |
 
-Completed: 2026-08-28
-
-Artifact: static web app (`dist/`)
-
-## What shipped
-
-- A complete local-first editor for Markdown articles containing prose, headings, inline/display LaTeX, MathML, inline/fenced code, Markdown tables, and figures.
-- Deterministic narration for common mathematical structure (fractions, roots, scripts, Greek letters, comparisons, sums, products, integrals, limits, matrices, and operators) plus numbered, symbol-expanded code chunks.
-- Explicit ambiguity checks for vertical bars, leading negatives, implicit multiplication, paired signs, matrices, raw slashes, unsupported LaTeX, dense code, tables, and figure descriptions.
-- An ordered human review flow: editable narration, per-note checkboxes, needs-review/revised/approved stamps, open-check filters, next-check navigation, and suggestion restoration.
-- Plain-text and Markdown exports containing the source excerpt, edited spoken route, review state, and unresolved checklist. Clipboard export includes a failure fallback.
-- Local browser persistence, confirmed destructive clearing, an offline status, and a service worker that precaches the built shell and runtime assets. No article text is transmitted.
-- Responsive 390px and desktop layouts, keyboard generation with `Ctrl/Command + Enter`, visible focus treatment, live action feedback, reduced-motion handling, and print styling.
-- Dedicated `/privacy/` and `/terms/` documents, install manifest, favicon, robots/sitemap, Azure Static Web Apps headers/navigation/caching configuration, MIT license, and full README.
-- A product-specific risograph collage system and original hero artwork. Prompt, model, review, and provenance are recorded in `.factory/design.md` and `assets/src/`.
-
-## How to run
+## Run and verify
 
 ```sh
-npm install
-npm run dev
+npm ci
 npm test
 npm run build
-npm run preview
 ```
 
-The required build command is exactly `npm run build`. It produces `dist/index.html`, `dist/privacy/index.html`, and `dist/terms/index.html`.
+Final clean-suite result: **19 unit tests passed; 37 browser tests passed; one
+mobile duplicate offline test skipped intentionally.** The browser suite checks
+normal, invalid, recovery, raw-HTML safety, boundary, review, exports, desktop,
+390px mobile, keyboard, focus, reduced motion, legal routes, metadata, 404,
+privacy requests, demo isolation, and offline reload.
 
-## Verification
+All twelve claim commands in `.factory/claims.json` were also run individually
+from the clean setup and passed. `npm run build` produces `dist/` with
+`index.html`, `demo/index.html`, legal pages, and `404.html`.
 
-All checks were run locally against the final production build on 2026-08-28.
+Additional checks:
 
-- `npm test`: passed — 19 unit cases and 13 Playwright browser cases across desktop and 390px mobile Chromium; one duplicate mobile service-worker case is intentionally skipped because the browser-level behavior is covered in desktop Chromium.
-- Equation fixture coverage: ten representative formulas, including fraction, square root, powers, sum, integral, limit, Greek variables, inequality, set membership, and matrix reading.
-- Playwright axe integration: zero serious or critical violations in both empty and generated states, with the color-contrast rule enabled.
-- `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173 …`: passed — HTTP 200, title present, `lang="en"`, one `h1`, main landmark present, zero missing image alts, zero unlabeled buttons, and zero console/page errors. Measured load: 565 ms.
-- Lighthouse 12.8.2, mobile defaults: Performance **100**, Accessibility **100**, Best Practices **100**, SEO **100**.
-- Lighthouse timings: FCP **0.9 s**, LCP **1.4 s**, Speed Index **0.9 s**, TBT **0 ms**, CLS **0**, interactive **1.4 s**.
-- Transfer size in the Lighthouse run: **59 KiB**. Production main JS: **29.51 KB raw / 10.56 KB gzip**. Main CSS: **17.38 KB raw / 4.80 KB gzip**. No font payload.
-- Responsive hero assets: **44 KB** at 720×480 and **104 KB** at 1120×747, both below the 300 KB budget.
-- `npm audit`: zero production or development dependency vulnerabilities after upgrades.
+- Axe through Playwright found zero serious or critical issues in empty and
+  populated desktop and mobile states.
+- `verify-url.sh` passed against the local emitted site and live HTTPS root:
+  title, `lang`, one `h1`, `main`, image alt text, button names, and root/demo
+  console checks are clean.
+- Live fresh desktop and phone contexts showed: job **Turn technical notation
+  into spoken scripts**; audience **teachers, learners, and technical
+  writers**; first action **Try it with sample data**. The demo showed nine
+  cards, its persistent label, and a successful reset. Phone width had no
+  horizontal overflow.
+- Live request capture during the demo observed only
+  `https://equation-audio-guide.sociobot.in`. A controlled service worker
+  reloaded `/demo/` offline with the demo banner, offline status, and nine
+  cards intact.
+- Live `/privacy/` and `/terms/` return their own titles and main landmarks.
+  Live `/missing-page` returns HTTP 404 and the designed recovery page.
+- Live headers include HSTS, `nosniff`, Referrer-Policy, Permissions-Policy,
+  CSP with response-header `frame-ancestors`, and the required self-only
+  script/style/connect policy.
+- Lighthouse output for the emitted site: Performance 100, Accessibility 100,
+  Best Practices 100, SEO 100; FCP 1.1s, LCP 1.6s, TBT 60ms, CLS 0, transfer
+  94 KiB. The Lighthouse process reported a post-audit tab crash after writing
+  this complete JSON report, so the category data is recorded accurately rather
+  than treating that wrapper exit as a product failure.
 
-## Known limits
+## Known limits and next steps
 
-- The grammar is deterministic and intentionally finite. Unknown LaTeX commands remain editable and receive a proofing note; the tool does not claim full TeX, MathML, or screen-reader equivalence.
-- Markdown is segmented for narration, not rendered as a rich article preview. Raw HTML is treated as text and never executed.
-- Table and figure output is a structured placeholder because a meaningful purpose-first description requires the author’s subject knowledge.
-- There is no voice synthesis, OCR, equation solving, cloud sync, collaboration, or account system; these are explicit non-goals from the brief.
-- The success target of approving ten equations in under 15 minutes and listener comprehension at 80% needs a real teacher/listener study after deployment; automated fixtures cannot establish human comprehension.
-
-## Suggested next steps
-
-1. Run the ten-equation timed study with teachers and record which proofing prompts save or cost time.
-2. Add tested narration rules only for unsupported commands observed in real articles.
-3. Test exported scripts with multiple screen readers and recording workflows, while keeping the product’s non-equivalence language explicit.
+- Narration rules are deterministic and finite. Unknown LaTeX stays editable
+  and receives a review prompt. The tool does not claim full TeX, MathML, or
+  screen-reader equivalence.
+- It does not provide voice generation, OCR, equation solving, accounts, cloud
+  sync, or collaboration.
+- The brief’s teacher time target and listener-comprehension target require a
+  real study. Automated tests cannot establish those human outcomes.
+- Next: run the ten-equation teacher study, gather unsupported notation from
+  real articles, then add only tested narration rules that address it.
