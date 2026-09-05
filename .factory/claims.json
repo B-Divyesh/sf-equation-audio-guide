@@ -1,0 +1,86 @@
+[
+  {
+    "id": "demo-sandbox",
+    "claim": "The one-click sample uses separate demo storage and does not change real working data.",
+    "where": "Landing action, demo banner, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:demo-sandbox",
+    "sandbox": "Seed real local storage, open /demo, edit and reset the sample, then assert only demo: storage changed."
+  },
+  {
+    "id": "supported-input",
+    "claim": "Creates editable scripts from Markdown, LaTeX, MathML, code, tables, and figures.",
+    "where": "Landing copy, source label, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:supported-input",
+    "sandbox": "Clean /demo; build a mixed technical article and edit a generated phrase."
+  },
+  {
+    "id": "deterministic-review",
+    "claim": "Repeats the same suggestion for the same source and flags ambiguous notation for review.",
+    "where": "How it works, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:deterministic-review",
+    "sandbox": "Clean /demo; build an equation with vertical bars twice and compare the suggested phrase and proofing note."
+  },
+  {
+    "id": "review-states",
+    "claim": "Records approval and marks an approved script segment revised after editing.",
+    "where": "README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:review-states",
+    "sandbox": "Clean /demo; approve a generated heading, edit its narration, and observe the revised state."
+  },
+  {
+    "id": "text-export",
+    "claim": "Downloads review scripts as plain text and Markdown.",
+    "where": "Export controls, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:text-export",
+    "sandbox": "Clean /demo; download both formats and inspect their names and checklist content."
+  },
+  {
+    "id": "demo-persistence",
+    "claim": "Keeps the demo working copy after reload without using real working storage.",
+    "where": "Privacy page, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:demo-persistence",
+    "sandbox": "Clean /demo; build a changed sample, reload, and inspect local-storage namespaces."
+  },
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit.",
+    "where": "Privacy page, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:offline-reload",
+    "sandbox": "Fresh browser context; visit /demo, wait for service-worker control, go offline, then reload the page."
+  },
+  {
+    "id": "local-only",
+    "claim": "The app does not send entered article text over the network.",
+    "where": "Landing fact, privacy page, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:local-only",
+    "sandbox": "Clean /demo; record all browser requests while entering and building private source text."
+  },
+  {
+    "id": "no-account",
+    "claim": "Visitors can create a sample script without an account.",
+    "where": "Landing fact, privacy page, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:no-account",
+    "sandbox": "Clean /demo; open and use the populated script without sign-in controls."
+  },
+  {
+    "id": "text-not-audio",
+    "claim": "Creates a downloadable script, not synthetic audio.",
+    "where": "Landing fact, terms, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:text-not-audio",
+    "sandbox": "Clean /demo; verify the text export and absence of an audio or video player."
+  },
+  {
+    "id": "no-third-party-runtime",
+    "claim": "Uses no third-party runtime assets or tracking.",
+    "where": "Footer, privacy page, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:no-third-party-runtime",
+    "sandbox": "Clean /demo; capture runtime request origins through a sample export."
+  },
+  {
+    "id": "raw-html-text",
+    "claim": "Keeps raw article HTML as text instead of running it.",
+    "where": "How it works, README",
+    "test": "npm run test:e2e -- --project=chromium --grep @claim:raw-html-text",
+    "sandbox": "Clean /demo; build a source string with an image onerror handler and assert it stays text and never runs."
+  }
+]

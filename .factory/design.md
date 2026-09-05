@@ -56,6 +56,8 @@ Subject: an abstract printed textbook equation sheet passing through a handmade 
 
 Generated with the factory image model (`factory-image`) on 2026-08-28 using `/opt/fleet/lib/gen-image.sh`, 1536×1024 medium quality. The unmodified generation and exact prompt sidecar live in `assets/src/`; production WebP variants live in `public/assets/`. The image is original AI-generated artwork for this product and is disclosed in the footer. It illustrates the editorial workflow, not a synthetic voice capability.
 
+The same reviewed source image was cropped and optimized locally on 2026-09-05 for `public/equation-audio-guide-social.jpg` (1200×630 Open Graph card) and `public/apple-touch-icon.png` (180×180 touch icon). These derivatives contain no new generated content and retain the original artwork provenance.
+
 ### Hand-authored graphics
 
 All interface marks (check, warning lozenge, waveform dividers, crop marks) are CSS or inline SVG created for this repository. No stock icons, copyrighted characters, third-party artwork, or remote assets are used.

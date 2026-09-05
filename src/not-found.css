@@ -1,0 +1,5 @@
+main { min-height: calc(100vh - 228px); display: grid; align-content: center; }
+.not-found-actions { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.not-found-actions a { min-height: 48px; display: inline-flex; align-items: center; padding: 12px 18px; font-weight: 900; }
+.not-found-primary { color: white; background: var(--petrol); border: 2px solid var(--petrol); text-decoration: none; }
+@media (max-width: 580px) { main { min-height: calc(100vh - 310px); } .not-found-actions { align-items: stretch; flex-direction: column; } }

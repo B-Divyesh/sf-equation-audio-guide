@@ -2,7 +2,18 @@ import './styles.css';
 import { parseArticle } from './narration';
 import type { GuideSegment, ReviewStatus, SavedGuide } from './types';
 
-const STORAGE_KEY = 'equation-audio-guide:v1';
+const REAL_STORAGE_KEY = 'equation-audio-guide:v1';
+const DEMO_STORAGE_KEY = 'demo:equation-audio-guide:v1';
+const DEMO_SESSION_KEY = 'equation-audio-guide:demo-route';
+const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+const directDemo = currentPath === '/demo' || new URLSearchParams(window.location.search).get('demo') === '1';
+let isDemo = directDemo;
+try {
+  if (directDemo) sessionStorage.setItem(DEMO_SESSION_KEY, '1');
+  else if (sessionStorage.getItem(DEMO_SESSION_KEY) === '1') isDemo = true;
+} catch { /* Session storage may be disabled. */ }
+const storageKey = isDemo ? DEMO_STORAGE_KEY : REAL_STORAGE_KEY;
+const draftKey = `${storageKey}:draft`;
 const example = `# How gradient descent moves
 
 We update the parameter by stepping against the slope of the loss.
@@ -35,31 +46,44 @@ app.innerHTML = `
       <span>Equation<br>Audio Guide</span>
     </a>
     <nav aria-label="Primary navigation">
-      <a href="#workspace">Start a guide</a>
+      <a href="/demo/">Try the demo</a>
       <a href="#how">How it works</a>
+      <a href="/privacy/">Privacy</a>
     </nav>
-    <span class="local-note"><span aria-hidden="true">●</span> Local only</span>
+    <span class="local-note"><span aria-hidden="true">●</span> Browser only</span>
   </header>
 
+  <aside class="demo-banner" id="demo-banner" role="status" aria-label="Demo status" ${isDemo ? '' : 'hidden'}>
+    <p><strong>Demo — sample data, nothing is saved</strong></p>
+    <div>
+      <button class="demo-reset" id="reset-demo" type="button">Reset demo</button>
+      <a class="demo-start-real" id="start-real" href="/">Start for real</a>
+    </div>
+  </aside>
+
   <div class="network-banner" id="network-banner" role="status" hidden>
-    You’re offline. The guide still works here; exports stay on this device.
+    You’re offline. The guide still works here. Exports stay in this browser.
   </div>
 
   <main id="main">
     <section class="hero" aria-labelledby="page-title">
       <div class="hero-copy">
-        <p class="eyebrow"><span>Author’s working copy</span> <span>01</span></p>
-        <h1 id="page-title">Give every equation a <em>spoken route.</em></h1>
-        <p class="lede">Turn Markdown, LaTeX, code, tables, and figures into an editable narration script. You make the final call—because notation needs context, not guesswork.</p>
-        <a class="button button-primary hero-action" href="#workspace">Draft the audio guide <span aria-hidden="true">↓</span></a>
-        <p class="trust-line"><span aria-hidden="true">✦</span> Nothing is uploaded. No account. No synthetic voice.</p>
+        <p class="eyebrow"><span>Technical narration editor</span> <span>01</span></p>
+        <h1 id="page-title">Turn technical notation into spoken scripts</h1>
+        <p class="lede">For teachers, learners, and technical writers who need an editable way to explain equations and code aloud.</p>
+        <div class="hero-actions">
+          <a class="button button-primary hero-action" href="/demo/">Try it with sample data <span aria-hidden="true">→</span></a>
+          <a class="text-link" href="#workspace">Or paste your article below</a>
+        </div>
+        <p class="action-note">The demo opens a filled technical article and its reviewable script.</p>
+        <ul class="trust-line" aria-label="Product facts"><li>No account</li><li>Article text stays in your browser</li><li>Creates a script, not audio</li></ul>
       </div>
       <figure class="hero-art">
         <div class="tape tape-top" aria-hidden="true"></div>
         <picture>
           <img src="/assets/audio-margin-hero-1120.webp" srcset="/assets/audio-margin-hero-720.webp 720w, /assets/audio-margin-hero-1120.webp 1120w" sizes="(max-width: 960px) calc(100vw - 40px), 48vw" width="1536" height="1024" fetchpriority="high" decoding="async" alt="Risograph collage of a notation sheet passing through a folded paper horn and emerging as three checked narration strips.">
         </picture>
-        <figcaption><span>Notation in</span><span>Narration out</span></figcaption>
+        <figcaption><span>Source notation</span><span>Editable script</span></figcaption>
       </figure>
     </section>
 
@@ -67,10 +91,10 @@ app.innerHTML = `
       <div class="section-rule" aria-hidden="true"><span>✣</span></div>
       <div class="workspace-heading">
         <div>
-          <p class="kicker">The working table</p>
-          <h2 id="workspace-title">Draft, listen on paper, approve.</h2>
+          <p class="kicker">Create a guide</p>
+          <h2 id="workspace-title">Paste your article and review the script</h2>
         </div>
-        <p>This tool proposes a starting point, not universal screen-reader output. Review the meaning and phrasing before you publish.</p>
+        <p>Suggestions are not universal screen-reader output. Check the wording before you publish.</p>
       </div>
 
       <div class="workbench">
@@ -78,9 +102,9 @@ app.innerHTML = `
           <div class="pane-heading">
             <div>
               <span class="step-number">1</span>
-              <div><p class="kicker">Source sheet</p><h3 id="source-title">Paste your article</h3></div>
+              <div><p class="kicker">Article source</p><h3 id="source-title">Paste your article</h3></div>
             </div>
-            <button class="text-button" id="load-example" type="button">Load example</button>
+            <button class="text-button" id="load-example" type="button">Try the sample</button>
           </div>
           <label for="source-input">Markdown, LaTeX, MathML, or code</label>
           <textarea id="source-input" spellcheck="false" maxlength="60000" placeholder="Paste a section here…&#10;&#10;Try: The area is $A = \\pi r^2$." aria-describedby="source-help source-count"></textarea>
@@ -100,14 +124,14 @@ app.innerHTML = `
           <div class="pane-heading review-heading">
             <div>
               <span class="step-number step-number-red">2</span>
-              <div><p class="kicker">Audio margin</p><h3 id="review-title" tabindex="-1">Review the route</h3></div>
+              <div><p class="kicker">Script review</p><h3 id="review-title" tabindex="-1">Review the script</h3></div>
             </div>
             <div class="progress-stamp" id="progress-stamp" aria-live="polite"><strong>0/0</strong><span>approved</span></div>
           </div>
           <div id="review-empty" class="review-empty">
             <span class="empty-glyph" aria-hidden="true">$ → ”</span>
-            <h4>Your spoken route starts here.</h4>
-            <p>Paste a section, then build the guide. Equations become editable phrases; uncertain notation gets a proofing note.</p>
+            <h4>Your script will appear here.</h4>
+            <p>Paste a section and build the guide. You can edit every suggestion before publishing.</p>
           </div>
           <div id="review-content" hidden>
             <div class="review-toolbar" aria-label="Review controls">
@@ -121,9 +145,9 @@ app.innerHTML = `
             <ol class="segment-list" id="segment-list"></ol>
             <div class="export-desk" id="export-desk">
               <div>
-                <p class="kicker">Take it to the recording desk</p>
-                <h4>Export the author-reviewed script</h4>
-                <p>Unchecked proofing notes remain visible in every export.</p>
+                <p class="kicker">Export the script</p>
+                <h4>Download the reviewed script</h4>
+                <p>Exports include each unchecked proofing note.</p>
               </div>
               <div class="export-actions">
                 <button class="button button-primary" id="copy-script" type="button">Copy script</button>
@@ -137,21 +161,21 @@ app.innerHTML = `
     </section>
 
     <section class="how" id="how" aria-labelledby="how-title">
-      <p class="kicker">A compact editorial pass</p>
-      <h2 id="how-title">Three marks to a publishable guide.</h2>
+      <p class="kicker">How it works</p>
+      <h2 id="how-title">Create a spoken script in three steps</h2>
       <ol>
-        <li><span>01</span><h3>Detect the route</h3><p>Keep prose in order and identify equations, code, tables, and figures without executing article HTML.</p></li>
-        <li><span>02</span><h3>Resolve the meaning</h3><p>Edit deterministic suggestions and close notes for vertical bars, implicit products, matrices, and visual structure.</p></li>
-        <li><span>03</span><h3>Export open text</h3><p>Copy or download the narration and checklist. It stays editable in any writing or recording tool.</p></li>
+        <li><span>01</span><h3>Add article source</h3><p>Paste prose, equations, code, tables, and figures. Raw article HTML stays as text.</p></li>
+        <li><span>02</span><h3>Review suggestions</h3><p>Edit each spoken phrase. Close notes that need your subject knowledge.</p></li>
+        <li><span>03</span><h3>Export the script</h3><p>Copy or download the script and checklist as plain text or Markdown.</p></li>
       </ol>
     </section>
   </main>
 
   <footer>
     <div class="footer-mark" aria-hidden="true">∿</div>
-    <p><strong>Equation Audio Guide</strong><br>A local-first authoring aid, not a screen-reader replacement.</p>
-    <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-equation-audio-guide">Source</a></nav>
-    <p class="art-note">Hero artwork was generated for this project with the factory image model. No tracking or remote assets.</p>
+    <p><strong>Equation Audio Guide</strong><br>Editable narration scripts for technical articles.</p>
+    <nav aria-label="Footer navigation"><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-equation-audio-guide">Source</a></nav>
+    <p class="art-note">Original AI-generated collage. No third-party assets or tracking. Built by Param Factory · v1.1.0.</p>
   </footer>
 
   <dialog id="clear-dialog" aria-labelledby="clear-title">
@@ -181,6 +205,20 @@ let segments: GuideSegment[] = [];
 let currentFilter: 'all' | 'issues' | 'approved' = 'all';
 let toastTimer = 0;
 
+document.querySelector<HTMLAnchorElement>('.wordmark[href="/"]')?.addEventListener('click', () => {
+  try { sessionStorage.removeItem(DEMO_SESSION_KEY); } catch { /* Session storage may be disabled. */ }
+});
+
+function configureRouteMetadata(): void {
+  const title = isDemo ? 'Demo — Equation Audio Guide' : 'Equation Audio Guide — editable technical narration';
+  document.title = title;
+  const routeUrl = `https://equation-audio-guide.sociobot.in${isDemo ? '/demo' : '/'}`;
+  document.querySelector<HTMLLinkElement>('#canonical-link')?.setAttribute('href', routeUrl);
+  document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute('content', routeUrl);
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', title);
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', title);
+}
+
 function showToast(message: string): void {
   window.clearTimeout(toastTimer);
   toast.textContent = message;
@@ -204,7 +242,7 @@ function updateCount(): void {
 function saveGuide(): void {
   try {
     const guide: SavedGuide = { source: sourceInput.value, segments, savedAt: Date.now() };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(guide));
+    localStorage.setItem(storageKey, JSON.stringify(guide));
   } catch {
     showToast('This browser could not save locally. Export a copy before leaving.');
   }
@@ -212,7 +250,7 @@ function saveGuide(): void {
 
 function restoreGuide(): void {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey);
     if (!raw) return;
     const saved = JSON.parse(raw) as SavedGuide;
     if (typeof saved.source !== 'string' || !Array.isArray(saved.segments)) return;
@@ -221,7 +259,7 @@ function restoreGuide(): void {
     updateCount();
     if (segments.length) renderSegments();
   } catch {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(storageKey);
   }
 }
 
@@ -331,12 +369,33 @@ function updateSummary(): void {
   document.querySelector('#count-approved')!.textContent = String(approved);
 }
 
-function renderSegments(): void {
+function renderSegments(save = true): void {
   reviewEmpty.hidden = segments.length > 0;
   reviewContent.hidden = segments.length === 0;
   segmentList.replaceChildren(...segments.map(renderCard));
   updateSummary();
-  saveGuide();
+  if (save) saveGuide();
+}
+
+function selectAllSegmentsFilter(): void {
+  currentFilter = 'all';
+  document.querySelectorAll<HTMLButtonElement>('.filter-button').forEach((button) => {
+    const active = button.dataset.filter === 'all';
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+}
+
+function loadDemoSample(focusSource = false): void {
+  sourceInput.value = example;
+  sourceError.hidden = true;
+  sourceInput.removeAttribute('aria-invalid');
+  updateCount();
+  segments = parseArticle(example);
+  selectAllSegmentsFilter();
+  renderSegments();
+  if (focusSource) sourceInput.focus();
+  showToast('Sample technical article loaded.');
 }
 
 function buildGuide(): void {
@@ -347,12 +406,7 @@ function buildGuide(): void {
   if (error) { sourceInput.focus(); return; }
   try {
     segments = parseArticle(sourceInput.value);
-    currentFilter = 'all';
-    document.querySelectorAll<HTMLButtonElement>('.filter-button').forEach((button) => {
-      const active = button.dataset.filter === 'all';
-      button.classList.toggle('is-active', active);
-      button.setAttribute('aria-pressed', String(active));
-    });
+    selectAllSegmentsFilter();
     renderSegments();
     showToast(`Built ${segments.length} route ${segments.length === 1 ? 'segment' : 'segments'}.`);
     document.querySelector<HTMLElement>('#review-title')?.focus({ preventScroll: true });
@@ -408,7 +462,7 @@ sourceInput.addEventListener('input', () => {
   updateCount();
   sourceError.hidden = true;
   sourceInput.removeAttribute('aria-invalid');
-  try { localStorage.setItem(`${STORAGE_KEY}:draft`, sourceInput.value); } catch { /* Storage may be disabled. */ }
+  try { localStorage.setItem(draftKey, sourceInput.value); } catch { /* Storage may be disabled. */ }
 });
 
 sourceInput.addEventListener('keydown', (event) => {
@@ -417,12 +471,11 @@ sourceInput.addEventListener('keydown', (event) => {
 
 document.querySelector('#generate')!.addEventListener('click', buildGuide);
 document.querySelector('#load-example')!.addEventListener('click', () => {
-  if (sourceInput.value.trim() && sourceInput.value !== example && !window.confirm('Replace the current source with the worked example?')) return;
-  sourceInput.value = example;
-  updateCount();
-  sourceError.hidden = true;
-  sourceInput.focus();
-  showToast('Worked example loaded.');
+  if (!isDemo) {
+    window.location.assign('/demo/');
+    return;
+  }
+  loadDemoSample(true);
 });
 document.querySelector('#clear')!.addEventListener('click', () => {
   if (!sourceInput.value && !segments.length) { showToast('The working copy is already clear.'); return; }
@@ -431,11 +484,11 @@ document.querySelector('#clear')!.addEventListener('click', () => {
 document.querySelector('#confirm-clear')!.addEventListener('click', () => {
   sourceInput.value = '';
   segments = [];
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(`${STORAGE_KEY}:draft`);
+  localStorage.removeItem(storageKey);
+  localStorage.removeItem(draftKey);
   updateCount();
-  renderSegments();
-  window.setTimeout(() => { sourceInput.focus(); showToast('Working copy cleared.'); }, 0);
+  renderSegments(false);
+  window.setTimeout(() => { sourceInput.focus(); showToast(isDemo ? 'Demo changes cleared. Use Reset demo to restore the sample.' : 'Working copy cleared.'); }, 0);
 });
 
 segmentList.addEventListener('input', (event) => {
@@ -526,7 +579,27 @@ updateNetworkState();
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => undefined));
 
+configureRouteMetadata();
 restoreGuide();
-if (!sourceInput.value) {
-  try { sourceInput.value = localStorage.getItem(`${STORAGE_KEY}:draft`) ?? ''; updateCount(); } catch { /* Storage may be disabled. */ }
+if (isDemo && (!sourceInput.value || !segments.length)) {
+  loadDemoSample();
+} else if (!sourceInput.value) {
+  try { sourceInput.value = localStorage.getItem(draftKey) ?? ''; updateCount(); } catch { /* Storage may be disabled. */ }
+}
+
+if (isDemo) {
+  document.querySelector('#reset-demo')?.addEventListener('click', () => {
+    try {
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(draftKey);
+    } catch { /* Storage may be disabled. */ }
+    loadDemoSample(true);
+  });
+  document.querySelector<HTMLAnchorElement>('#start-real')?.addEventListener('click', () => {
+    try {
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(draftKey);
+      sessionStorage.removeItem(DEMO_SESSION_KEY);
+    } catch { /* Storage may be disabled. */ }
+  });
 }
